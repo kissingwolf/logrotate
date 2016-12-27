@@ -1,6 +1,52 @@
-## LOGROTATE##
+# LOGROTATE
 
-日志轮询
+## Logrotate 介绍
+
+**logrotate**是linux自带的一个日志轮询管理工具。可以很方便的用它来进行系统或应用服务日志的压缩和轮询更新。
+
+## Logrotate 作用
+
+* Logrotate可以轮换、压缩和调用邮件系统将日志文件发送到指定的E-mail邮箱。
+* Logrotate 可以用来把旧的日志文件删除，并创建新的日志文件，有效的降低日志存储对磁盘空间的需求，我们把这种功能叫做“转储”
+* Logrotate 可以调用cron（计划任务）根据日志文件的大小，也可以根据其天数来转储
+
+## Logrotate 原理
+* 默认的logrotate是被加入cron的`/etc/cron.daily`中作为每日任务执行。
+* `/etc/logrotate.conf`为其默认配置文件指定每个日志文件的默认规则。
+* `etc/logrotate.d/*` 为`/etc/logrotate.conf`默认包含目录`include(关键字)`中的文件也会被logrotate读取。指明每个系统服务日志文件的特定规则。
+* `/var/lib/logrotate/statue`中默认记录logrotate上次轮换日志文件的时间。
+
+## Logrotate 配置说明
+
+| 配置项                              | 说明                                       |
+| -------------------------------- | ---------------------------------------- |
+| compress/nocompress              | 通过gzip 压缩转储以后的日志/反之不需要压缩时，用nocompress    |
+| copytruncate/ nocopytruncate     | 用于还在打开中的日志文件，把当前日志备份并截断/反之，备份日志文件但是不截断   |
+| create mode owner group/nocreate | 转储文件，使用指定的文件模式创建新的日志文件反之，不建立新的日志文件       |
+| delaycompress/nodelaycompress    | 和 compress 一起使用时，转储的日志文件到下一次转储时才压缩覆盖 delaycompress 选项，转储同时压缩。 |
+| errors address                   | 专储时的错误信息发送到指定的Email 地址                   |
+| ifempty/notifempty               | 即使是空文件也转储，这个是 logrotate 的缺省选项。如果是空文件的话，不转储 |
+| mail address/nomail              | 把转储的日志文件发送到指定的E-mail 地址转储时不发送日志文件        |
+| olddir directory/noolddir        | 转储后的日志文件放入指定的目录，必须和当前日志文件在同一个文件系统转储后的日志文件和当前日志文件放在同一个目录下 |
+| prerotate/endscript              | 在转储以前需要执行的命令可以放入这个对，这两个关键字必须单独成行         |
+| postrotate/endscript             | 在转储以后需要执行的命令可以放入这个对，这两个关键字必须单独成行         |
+| daily                            | 指定转储周期为每天                                |
+| weekly                           | 指定转储周期为每周                                |
+| monthly                          | 指定转储周期为每月                                |
+| rotate count                     | 指定日志文件删除之前转储的次数，0 指没有备份，5 指保留5 个备份       |
+| size size                        | 当日志文件到达指定的大小时才转储，Size 可以指定 bytes (缺省)以及KB (sizek)或者MB (sizem). |
+| tabootext [+] list               | 让logrotate 不转储指定扩展名的文件，缺省的扩展名是：.rpm-orig, .rpmsave, v, 和 ~ |
+
+配置格式
+
+```config
+/full/path/to/file
+{
+option(s)
+}
+```
+
+## 日志轮询实验
 
 如果不指定rotate、周期等参数，则根据/etc/logrotate.conf主配置文件里的默认周期和rotate参数来执行轮询
 
@@ -163,8 +209,6 @@ running postrotate script
 compressing log with: /bin/gzip
 set default create context
 ```
-
-## 不要修改当前时间##
 
 /var/lib/logrotate.status记录了logrotate的文件操作时间
 
